@@ -16,6 +16,9 @@ import {
 import { collection, getDocs, updateDoc, doc, query, where, getDoc, onSnapshot } from 'firebase/firestore';
 import db from '../services/firebaseConfig';
 
+const { Search } = Input;
+const { Option } = Select;
+
 const OrderManagement = () => {
 
 };
