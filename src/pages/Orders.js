@@ -31,6 +31,40 @@ const OrderManagement = () => {
     const [lastNotifiedOrderIds, setLastNotifiedOrderIds] = useState(new Set());
     const previousOrderIdsRef = useRef(new Set());
 
+    const fetchOrders = () => {
+        const ordersCollection = collection(db, 'HoaDon');
+
+        onSnapshot(ordersCollection, (snapshot) => {
+            const fetchedOrders = snapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+
+            const sortedOrders = fetchedOrders.sort((a, b) => a.trangthai - b.trangthai);
+
+            const currentOrderIds = new Set(fetchedOrders.map((order) => order.id));
+            const newOrders = fetchedOrders.filter(
+                (order) => !previousOrderIdsRef.current.has(order.id)
+            );
+
+            if (newOrders.length > 0) {
+                const newOrderIds = new Set(newOrders.map((order) => order.id));
+                const notNotifiedOrders = newOrders.filter(
+                    (order) => !lastNotifiedOrderIds.has(order.id)
+                );
+
+                if (notNotifiedOrders.length > 0) {
+                    message.success(`Có ${notNotifiedOrders.length} đơn hàng mới!`);
+                    setLastNotifiedOrderIds(newOrderIds);
+                }
+            }
+
+            previousOrderIdsRef.current = currentOrderIds;
+
+            setOrders(sortedOrders);
+            applyFilters(sortedOrders, statusFilter, ''); // Áp dụng bộ lọc
+        });
+    };
 
 };
 
