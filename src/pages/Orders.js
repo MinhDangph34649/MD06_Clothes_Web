@@ -66,6 +66,20 @@ const OrderManagement = () => {
         });
     };
 
+    const applyFilters = (orders, statusFilter, searchValue) => {
+        const filtered = orders.filter((order) => {
+            const matchesStatus = statusFilter !== null ? order.trangthai === statusFilter : true;
+            const matchesSearch =
+                order.hoten?.toLowerCase().includes(searchValue.toLowerCase()) ||
+                order.sdt.includes(searchValue) ||
+                order.UID.includes(searchValue);
+
+            return matchesStatus && matchesSearch;
+        });
+
+        setFilteredOrders(filtered);
+    };
+
 };
 
 export default OrderManagement;
