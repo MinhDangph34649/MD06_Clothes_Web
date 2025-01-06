@@ -80,6 +80,77 @@ const OrderManagement = () => {
         setFilteredOrders(filtered);
     };
 
+    const fetchOrderDetails = async (orderId, uid) => {
+        try {
+            const detailsQuery = query(
+                collection(db, `ChitietHoaDon/${uid}/ALL`),
+                where('id_hoadon', '==', orderId)
+            );
+
+            const querySnapshot = await getDocs(detailsQuery);
+
+            const fetchedDetails = await Promise.all(
+                querySnapshot.docs.map(async (detailDoc) => {
+                    const detailData = detailDoc.data();
+                    try {
+                        const productRef = doc(db, 'SanPham', detailData.id_product);
+                        const productSnapshot = await getDoc(productRef);
+
+                        if (productSnapshot.exists()) {
+                            const productData = productSnapshot.data();
+
+                            return {
+                                id: detailDoc.id,
+                                ...detailData,
+                                productName: productData.tensp || 'Không tìm thấy',
+                                productType: productData.loaisp || 'Không xác định',
+                                productDescription: productData.mota || '',
+                                productMaterial: productData.chatlieu || 'Không xác định',
+                                productSizes: detailData.sizes || [],
+                                productPrice: productData.giatien || 0,
+                                productImage: productData.hinhanh || '',
+                                productCategory: productData.type || 'Không xác định',
+                            };
+                        } else {
+                            return {
+                                id: detailDoc.id,
+                                ...detailData,
+                                productName: 'Không tìm thấy',
+                                productType: 'Không xác định',
+                                productDescription: '',
+                                productMaterial: 'Không xác định',
+                                productSizes: detailData.sizes || [],
+                                productPrice: 0,
+                                productImage: '',
+                                productCategory: 'Không xác định',
+                            };
+                        }
+                    } catch (productError) {
+                        console.error('Error fetching product data:', productError);
+                        return {
+                            id: detailDoc.id,
+                            ...detailData,
+                            productName: 'Không tìm thấy',
+                            productType: 'Không xác định',
+                            productDescription: '',
+                            productMaterial: 'Không xác định',
+                            productSizes: detailData.sizes || [],
+                            productPrice: 0,
+                            productImage: '',
+                            productCategory: 'Không xác định',
+                        };
+                    }
+                })
+            );
+
+            setOrderDetails(fetchedDetails);
+        } catch (error) {
+            console.error('Error fetching order details:', error);
+            message.error('Lỗi khi lấy chi tiết hóa đơn!');
+        }
+    };
+
+
 };
 
 export default OrderManagement;
