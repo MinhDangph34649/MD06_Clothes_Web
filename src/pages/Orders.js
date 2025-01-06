@@ -150,6 +150,48 @@ const OrderManagement = () => {
         }
     };
 
+    const handleCancelOrder = async (order) => {
+        try {
+            const detailsQuery = query(
+                collection(db, `ChitietHoaDon/${order.UID}/ALL`),
+                where('id_hoadon', '==', order.id)
+            );
+
+            const querySnapshot = await getDocs(detailsQuery);
+
+            const orderDetails = querySnapshot.docs.map((doc) => doc.data());
+
+            for (const detail of orderDetails) {
+                const productRef = doc(db, 'SanPham', detail.id_product);
+                const productSnapshot = await getDoc(productRef);
+
+                if (productSnapshot.exists()) {
+                    const productData = productSnapshot.data();
+                    const updatedSizes = productData.sizes.map((size) => {
+                        const matchingSize = detail.sizes.find((dSize) => dSize.size === size.size);
+                        if (matchingSize) {
+                            return {
+                                ...size,
+                                soluong: size.soluong + matchingSize.soluong,
+                            };
+                        }
+                        return size;
+                    });
+
+                    await updateDoc(productRef, { sizes: updatedSizes });
+                }
+            }
+
+            const orderRef = doc(db, 'HoaDon', order.id);
+            await updateDoc(orderRef, { trangthai: 4 });
+
+            message.success('Đơn hàng đã được hủy và tồn kho đã được cập nhật.');
+            closeModal();
+        } catch (error) {
+            console.error('Error cancelling order:', error);
+            message.error('Lỗi khi hủy đơn hàng!');
+        }
+    };
 
 };
 
