@@ -193,6 +193,21 @@ const OrderManagement = () => {
         }
     };
 
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 1:
+                return 'orange';
+            case 2:
+                return 'blue';
+            case 3:
+                return 'green';
+            case 4:
+                return 'red';
+            default:
+                return 'gray';
+        }
+    };
+
 };
 
 export default OrderManagement;
