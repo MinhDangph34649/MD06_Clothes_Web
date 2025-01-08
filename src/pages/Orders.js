@@ -193,6 +193,70 @@ const OrderManagement = () => {
         }
     };
 
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 1:
+                return 'orange';
+            case 2:
+                return 'blue';
+            case 3:
+                return 'green';
+            case 4:
+                return 'red';
+            default:
+                return 'gray';
+        }
+    };
+
+    const getStatusText = (status) => {
+        switch (status) {
+            case 1:
+                return 'Đang xử lý';
+            case 2:
+                return 'Đang giao';
+            case 3:
+                return 'Đã giao';
+            case 4:
+                return 'Đã huỷ';
+            default:
+                return 'Không xác định';
+        }
+    };
+
+    const confirmCancelOrder = (order) => {
+        Modal.confirm({
+            title: 'Xác nhận hủy đơn hàng',
+            content: 'Bạn có chắc chắn muốn hủy đơn hàng này không?',
+            okText: 'Xác nhận',
+            cancelText: 'Hủy',
+            onOk: () => handleCancelOrder(order),
+        });
+    };
+
+    const handleStatusChange = async () => {
+        if (!newStatus) {
+            message.warning('Vui lòng chọn trạng thái mới!');
+            return;
+        }
+
+        if (selectedOrder.trangthai === 3 || selectedOrder.trangthai === 4) {
+            message.warning('Không thể thay đổi trạng thái của hóa đơn đã giao hoặc đã huỷ!');
+            return;
+        }
+
+        try {
+            const orderRef = doc(db, 'HoaDon', selectedOrder.id);
+            await updateDoc(orderRef, { trangthai: newStatus });
+
+            message.success('Cập nhật trạng thái đơn hàng thành công!');
+            closeModal();
+        } catch (error) {
+            console.error('Error updating order status:', error);
+            message.error('Lỗi khi cập nhật trạng thái đơn hàng!');
+        }
+    };
+
+
 };
 
 export default OrderManagement;
