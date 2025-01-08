@@ -233,6 +233,30 @@ const OrderManagement = () => {
         });
     };
 
+    const handleStatusChange = async () => {
+        if (!newStatus) {
+            message.warning('Vui lòng chọn trạng thái mới!');
+            return;
+        }
+
+        if (selectedOrder.trangthai === 3 || selectedOrder.trangthai === 4) {
+            message.warning('Không thể thay đổi trạng thái của hóa đơn đã giao hoặc đã huỷ!');
+            return;
+        }
+
+        try {
+            const orderRef = doc(db, 'HoaDon', selectedOrder.id);
+            await updateDoc(orderRef, { trangthai: newStatus });
+
+            message.success('Cập nhật trạng thái đơn hàng thành công!');
+            closeModal();
+        } catch (error) {
+            console.error('Error updating order status:', error);
+            message.error('Lỗi khi cập nhật trạng thái đơn hàng!');
+        }
+    };
+
+
 };
 
 export default OrderManagement;
