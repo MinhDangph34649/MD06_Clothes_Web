@@ -208,6 +208,21 @@ const OrderManagement = () => {
         }
     };
 
+    const getStatusText = (status) => {
+        switch (status) {
+            case 1:
+                return 'Đang xử lý';
+            case 2:
+                return 'Đang giao';
+            case 3:
+                return 'Đã giao';
+            case 4:
+                return 'Đã huỷ';
+            default:
+                return 'Không xác định';
+        }
+    };
+
 };
 
 export default OrderManagement;
