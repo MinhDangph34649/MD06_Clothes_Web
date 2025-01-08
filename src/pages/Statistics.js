@@ -13,7 +13,7 @@ import {
 import { Bar, Line } from 'react-chartjs-2';
 import { collection, getDocs } from 'firebase/firestore';
 import db from '../services/firebaseConfig';
-import { Select, message, Switch, Row, Col, DatePicker, List, Avatar, Button } from 'antd';
+import { Select, message, Switch, Row, Col, DatePicker, List, Avatar, Button, Spin } from 'antd';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 
@@ -41,8 +41,9 @@ const Statistics = () => {
     const [showLegend, setShowLegend] = useState(true);
     const [chartType, setChartType] = useState('Bar');
     const [bestSellers, setBestSellers] = useState([]);
-    const [inventoryData, setInventoryData] = useState([]); // Hàng tồn kho
-    const [totalRevenue, setTotalRevenue] = useState(0); // State để lưu tổng tiền
+    const [inventoryData, setInventoryData] = useState([]);
+    const [totalRevenue, setTotalRevenue] = useState(0);
+    const [loading, setLoading] = useState(false); // Thêm state loading
 
     // Fetch all orders and sales data
     const fetchAllData = async () => {
@@ -89,12 +90,12 @@ const Statistics = () => {
             const productSnapshot = await getDocs(collection(db, 'SanPham'));
             const inventory = productSnapshot.docs.map((doc) => {
                 const sizes = doc.data().sizes || [];
-                const totalQuantity = sizes.reduce((sum, size) => sum + size.soluong, 0); // Tính tổng số lượng từ sizes
+                const totalQuantity = sizes.reduce((sum, size) => sum + size.soluong, 0);
                 return {
                     id: doc.id,
                     tensp: doc.data().tensp,
                     hinhanh: doc.data().hinhanh,
-                    totalQuantity, // Tổng số lượng từ tất cả sizes
+                    totalQuantity,
                 };
             });
             setInventoryData(inventory);
@@ -104,79 +105,70 @@ const Statistics = () => {
         }
     };
 
-
-    // Modify the calculateStatistics function's sorting logic
-
     const calculateStatistics = async () => {
-        const { orders, salesData } = await fetchAllData();
+        setLoading(true); // Bật trạng thái loading
+        try {
+            const { orders, salesData } = await fetchAllData();
 
-        // Filter orders based on date range
-        const filteredOrders = orders.filter((order) => {
-            if (dateRange[0] && dateRange[1]) {
-                const startDate = dayjs(dateRange[0]).startOf('day');
-                const endDate = dayjs(dateRange[1]).endOf('day');
-                return order.ngaydat.isBetween(startDate, endDate, null, '[]');
-            }
-            return true;
-        });
+            const filteredOrders = orders.filter((order) => {
+                if (dateRange[0] && dateRange[1]) {
+                    const startDate = dayjs(dateRange[0]).startOf('day');
+                    const endDate = dayjs(dateRange[1]).endOf('day');
+                    return order.ngaydat.isBetween(startDate, endDate, null, '[]');
+                }
+                return true;
+            });
 
-        // Group revenue data by timeframe
-        const groupedData = {};
-        let totalRevenueTemp = 0; // Biến tạm để tính tổng tiền
-        filteredOrders.forEach((order) => {
-            let key = '';
-            if (timeFrame === 'day') {
-                key = order.ngaydat.format('DD/MM/YYYY');
-            } else if (timeFrame === 'month') {
-                key = order.ngaydat.format('MM/YYYY');
-            } else if (timeFrame === 'year') {
-                key = order.ngaydat.format('YYYY');
-            }
-            groupedData[key] = (groupedData[key] || 0) + order.tongtien;
-            totalRevenueTemp += order.tongtien; // Cộng dồn tổng tiền
-        });
+            const groupedData = {};
+            let totalRevenueTemp = 0;
+            filteredOrders.forEach((order) => {
+                let key = '';
+                if (timeFrame === 'day') {
+                    key = order.ngaydat.format('DD/MM/YYYY');
+                } else if (timeFrame === 'month') {
+                    key = order.ngaydat.format('MM/YYYY');
+                } else if (timeFrame === 'year') {
+                    key = order.ngaydat.format('YYYY');
+                }
+                groupedData[key] = (groupedData[key] || 0) + order.tongtien;
+                totalRevenueTemp += order.tongtien;
+            });
 
-        // Convert dates to dayjs objects for proper sorting
-        const sortedKeys = Object.keys(groupedData)
-            .map((key) => {
-                const format = timeFrame === 'day' ? 'DD/MM/YYYY' : timeFrame === 'month' ? 'MM/YYYY' : 'YYYY';
-                return { key, date: dayjs(key, format) };
-            })
-            .sort((a, b) => a.date.valueOf() - b.date.valueOf()) // Sort by ascending order
-            .map((item) => item.key); // Retrieve sorted keys
+            const sortedKeys = Object.keys(groupedData)
+                .map((key) => {
+                    const format = timeFrame === 'day' ? 'DD/MM/YYYY' : timeFrame === 'month' ? 'MM/YYYY' : 'YYYY';
+                    return { key, date: dayjs(key, format) };
+                })
+                .sort((a, b) => a.date.valueOf() - b.date.valueOf())
+                .map((item) => item.key);
 
-        const sortedData = sortedKeys.map((key) => groupedData[key]);
+            const sortedData = sortedKeys.map((key) => groupedData[key]);
 
-        // Sort and fetch details for top-selling products
-        const sortedSales = Object.entries(salesData)
-            .sort(([, a], [, b]) => b - a)
-            .slice(0, 10);
+            const sortedSales = Object.entries(salesData)
+                .sort(([, a], [, b]) => b - a)
+                .slice(0, 10);
 
-        const bestSellerPromises = sortedSales.map(async ([id_product, totalSold]) => {
-            const product = await fetchProductDetails(id_product);
-            return { id_product, ...product, totalSold };
-        });
+            const bestSellerPromises = sortedSales.map(async ([id_product, totalSold]) => {
+                const product = await fetchProductDetails(id_product);
+                return { id_product, ...product, totalSold };
+            });
 
-        const bestSellersData = await Promise.all(bestSellerPromises);
+            const bestSellersData = await Promise.all(bestSellerPromises);
 
-        // Update state with sorted data
-        setLabels(sortedKeys);
-        setChartData(sortedData);
-        setBestSellers(bestSellersData);
-        setTotalRevenue(totalRevenueTemp); // Cập nhật tổng tiền vào state
-
-        if (sortedKeys.length === 0) {
-            message.warning('No data available for the selected date range.');
+            setLabels(sortedKeys);
+            setChartData(sortedData);
+            setBestSellers(bestSellersData);
+            setTotalRevenue(totalRevenueTemp);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false); // Tắt trạng thái loading
         }
     };
 
-
-
-
-
     useEffect(() => {
         calculateStatistics();
-        fetchInventoryData(); // Lấy dữ liệu hàng tồn kho
+        fetchInventoryData();
     }, [timeFrame, dateRange]);
 
     const data = {
@@ -203,86 +195,93 @@ const Statistics = () => {
     return (
         <div>
             <h2>Statistics</h2>
-            <Row gutter={[16, 16]} style={{ marginBottom: '16px' }}>
-                <Col span={8}>
-                    <Select
-                        value={timeFrame}
-                        onChange={(value) => setTimeFrame(value)}
-                        style={{ width: '100%' }}
-                    >
-                        <Option value="day">By Day</Option>
-                        <Option value="month">By Month</Option>
-                        <Option value="year">By Year</Option>
-                    </Select>
-                </Col>
-                <Col span={8}>
-                    <RangePicker
-                        onChange={(dates) => setDateRange(dates || [null, null])}
-                        format="DD/MM/YYYY"
-                        style={{ width: '100%' }}
-                    />
-                </Col>
-                <Col span={8}>
-                    <Switch
-                        checked={showLegend}
-                        onChange={(checked) => setShowLegend(checked)}
-                        checkedChildren="Show Legend"
-                        unCheckedChildren="Hide Legend"
-                    />
-                </Col>
-            </Row>
-
-            <div style={{ marginBottom: '16px' }}>
-                <h3>Total Revenue: {totalRevenue.toLocaleString()} VNĐ</h3> {/* Hiển thị tổng tiền */}
-            </div>
-
-            <Button onClick={() => setChartType(chartType === 'Bar' ? 'Line' : 'Bar')}>
-                Toggle Chart Type
-            </Button>
-
-            {chartType === 'Bar' ? (
-                <Bar data={data} options={options} />
+            {loading ? (
+                <div style={{ textAlign: 'center', padding: '20px' }}>
+                    <Spin tip="Đang tải dữ liệu..." />
+                </div>
             ) : (
-                <Line data={data} options={options} />
-            )}
+                <>
+                    <Row gutter={[16, 16]} style={{ marginBottom: '16px' }}>
+                        <Col span={8}>
+                            <Select
+                                value={timeFrame}
+                                onChange={(value) => setTimeFrame(value)}
+                                style={{ width: '100%' }}
+                            >
+                                <Option value="day">By Day</Option>
+                                <Option value="month">By Month</Option>
+                                <Option value="year">By Year</Option>
+                            </Select>
+                        </Col>
+                        <Col span={8}>
+                            <RangePicker
+                                onChange={(dates) => setDateRange(dates || [null, null])}
+                                format="DD/MM/YYYY"
+                                style={{ width: '100%' }}
+                            />
+                        </Col>
+                        <Col span={8}>
+                            <Switch
+                                checked={showLegend}
+                                onChange={(checked) => setShowLegend(checked)}
+                                checkedChildren="Show Legend"
+                                unCheckedChildren="Hide Legend"
+                            />
+                        </Col>
+                    </Row>
 
-            <Row gutter={[16, 16]}>
-                <Col span={12}>
-                    <h3>Top-Selling Products</h3>
-                    <List
-                        itemLayout="horizontal"
-                        dataSource={bestSellers}
-                        renderItem={(item) => (
-                            <List.Item>
-                                <List.Item.Meta
-                                    avatar={<Avatar src={item?.hinhanh || ''} />}
-                                    title={item?.tensp || 'Unknown'}
-                                    description={`Sold: ${item.totalSold} - Price: ${item?.giatien || 'N/A'} VNĐ`}
-                                />
-                            </List.Item>
-                        )}
-                    />
-                </Col>
-                <Col span={12}>
-                    <h3>Inventory Data</h3>
-                    <List
-                        itemLayout="horizontal"
-                        dataSource={inventoryData}
-                        renderItem={(item) => (
-                            <List.Item>
-                                <List.Item.Meta
-                                    avatar={<Avatar src={item.hinhanh} />}
-                                    title={item.tensp}
-                                    description={`Inventory: ${item.totalQuantity}`}
-                                />
-                            </List.Item>
-                        )}
-                    />
-                </Col>
-            </Row>
+                    <div style={{ marginBottom: '16px' }}>
+                        <h3>Total Revenue: {totalRevenue.toLocaleString()} VNĐ</h3>
+                    </div>
+
+                    <Button onClick={() => setChartType(chartType === 'Bar' ? 'Line' : 'Bar')}>
+                        Toggle Chart Type
+                    </Button>
+
+                    {chartType === 'Bar' ? (
+                        <Bar data={data} options={options} />
+                    ) : (
+                        <Line data={data} options={options} />
+                    )}
+
+                    <Row gutter={[16, 16]}>
+                        <Col span={12}>
+                            <h3>Top-Selling Products</h3>
+                            <List
+                                itemLayout="horizontal"
+                                dataSource={bestSellers}
+                                renderItem={(item) => (
+                                    <List.Item>
+                                        <List.Item.Meta
+                                            avatar={<Avatar src={item?.hinhanh || ''} />}
+                                            title={item?.tensp || 'Unknown'}
+                                            description={`Sold: ${item.totalSold}`}
+                                        />
+                                    </List.Item>
+                                )}
+                            />
+                        </Col>
+                        <Col span={12}>
+                            <h3>Inventory Status</h3>
+                            <List
+                                itemLayout="horizontal"
+                                dataSource={inventoryData}
+                                renderItem={(item) => (
+                                    <List.Item>
+                                        <List.Item.Meta
+                                            avatar={<Avatar src={item.hinhanh || ''} />}
+                                            title={item.tensp || 'Unknown'}
+                                            description={`Total Quantity: ${item.totalQuantity}`}
+                                        />
+                                    </List.Item>
+                                )}
+                            />
+                        </Col>
+                    </Row>
+                </>
+            )}
         </div>
     );
-
 };
 
 export default Statistics;
