@@ -193,6 +193,46 @@ const OrderManagement = () => {
         }
     };
 
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 1:
+                return 'orange';
+            case 2:
+                return 'blue';
+            case 3:
+                return 'green';
+            case 4:
+                return 'red';
+            default:
+                return 'gray';
+        }
+    };
+
+    const getStatusText = (status) => {
+        switch (status) {
+            case 1:
+                return 'Đang xử lý';
+            case 2:
+                return 'Đang giao';
+            case 3:
+                return 'Đã giao';
+            case 4:
+                return 'Đã huỷ';
+            default:
+                return 'Không xác định';
+        }
+    };
+
+    const confirmCancelOrder = (order) => {
+        Modal.confirm({
+            title: 'Xác nhận hủy đơn hàng',
+            content: 'Bạn có chắc chắn muốn hủy đơn hàng này không?',
+            okText: 'Xác nhận',
+            cancelText: 'Hủy',
+            onOk: () => handleCancelOrder(order),
+        });
+    };
+
 };
 
 export default OrderManagement;
