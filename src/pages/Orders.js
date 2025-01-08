@@ -263,6 +263,13 @@ const OrderManagement = () => {
         setNewStatus(null);
     };
 
+    const handleViewDetails = async (order) => {
+        setSelectedOrder(order);
+        setNewStatus(order.trangthai);
+        await fetchOrderDetails(order.id, order.UID);
+        setIsModalOpen(true);
+    };
+
 };
 
 export default OrderManagement;
