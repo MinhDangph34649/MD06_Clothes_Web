@@ -223,6 +223,16 @@ const OrderManagement = () => {
         }
     };
 
+    const confirmCancelOrder = (order) => {
+        Modal.confirm({
+            title: 'Xác nhận hủy đơn hàng',
+            content: 'Bạn có chắc chắn muốn hủy đơn hàng này không?',
+            okText: 'Xác nhận',
+            cancelText: 'Hủy',
+            onOk: () => handleCancelOrder(order),
+        });
+    };
+
 };
 
 export default OrderManagement;
