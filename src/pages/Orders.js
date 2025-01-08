@@ -256,6 +256,12 @@ const OrderManagement = () => {
         }
     };
 
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setSelectedOrder(null);
+        setOrderDetails([]);
+        setNewStatus(null);
+    };
 
 };
 
