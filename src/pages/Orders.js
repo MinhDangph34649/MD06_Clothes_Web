@@ -256,6 +256,198 @@ const OrderManagement = () => {
         }
     };
 
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setSelectedOrder(null);
+        setOrderDetails([]);
+        setNewStatus(null);
+    };
+
+    const handleViewDetails = async (order) => {
+        setSelectedOrder(order);
+        setNewStatus(order.trangthai);
+        await fetchOrderDetails(order.id, order.UID);
+        setIsModalOpen(true);
+    };
+
+
+    useEffect(() => {
+        fetchOrders();
+    }, []);
+
+    return (
+        <div>
+            <h2 style={{ marginBottom: '16px' }}>Quản lý đơn hàng</h2>
+
+            <Row gutter={[16, 16]} style={{ marginBottom: '16px' }}>
+                <Col span={12}>
+                    <Search
+                        placeholder="Tìm kiếm theo tên hoặc số điện thoại"
+                        onSearch={(value) => applyFilters(orders, statusFilter, value)}
+                        enterButton
+                    />
+                </Col>
+                <Col span={12}>
+                    <Select
+                        placeholder="Lọc theo trạng thái"
+                        onChange={(value) => setStatusFilter(value)}
+                        allowClear
+                        style={{ width: '100%' }}
+                    >
+                        <Option value={1}>Đang xử lý</Option>
+                        <Option value={2}>Đang giao</Option>
+                        <Option value={3}>Đã giao</Option>
+                        <Option value={4}>Đã huỷ</Option>
+                    </Select>
+                </Col>
+            </Row>
+
+            <Row gutter={[16, 16]}>
+                {filteredOrders.map((order) => (
+                    <Col xs={24} sm={12} md={8} lg={6} key={order.id}>
+                        <Card
+                            title={`Hóa đơn: ${order.id}`}
+                            extra={
+                                <Tag color={getStatusColor(order.trangthai)}>
+                                    {getStatusText(order.trangthai)}
+                                </Tag>
+                            }
+                        >
+                            <p>Họ tên: {order.hoten}</p>
+                            <p>Số điện thoại: {order.sdt}</p>
+                            <p>Tổng tiền: {order.tongtien} VNĐ</p>
+                            <Button
+                                type="primary"
+                                onClick={() => handleViewDetails(order)}
+                                style={{ marginRight: 8 }}
+                            >
+                                Xem chi tiết
+                            </Button>
+                            {order.trangthai === 1 && (
+                                <Button
+                                    type="danger"
+                                    style={{ backgroundColor: 'red', color: 'white', marginTop: 8 }}
+                                    onClick={() => confirmCancelOrder(order)}
+                                >
+                                    Hủy đơn hàng
+                                </Button>
+                            )}
+                        </Card>
+                    </Col>
+                ))}
+            </Row>
+
+            <Modal
+                title="Chi tiết hóa đơn"
+                visible={isModalOpen}
+                onCancel={closeModal}
+                width={1100}
+                footer={[
+                    <Button key="cancel" onClick={closeModal}>
+                        Đóng
+                    </Button>,
+                    selectedOrder?.trangthai === 1 && (
+
+                        <Button
+                            key="cancelOrder"
+                            type="danger"
+                            onClick={() => confirmCancelOrder(selectedOrder)}
+                            style={{ backgroundColor: 'red', color: 'white' }}
+                        >
+                            Hủy đơn hàng
+                        </Button>
+
+                    ),
+                    <Button key="save" type="primary" onClick={handleStatusChange}>
+                        Lưu thay đổi
+                    </Button>,
+                ]}
+            >
+                {selectedOrder && (
+                    <>
+                        <Descriptions bordered column={1}>
+                            <Descriptions.Item label="ID">{selectedOrder.id}</Descriptions.Item>
+                            <Descriptions.Item label="Họ tên">{selectedOrder.hoten}</Descriptions.Item>
+                            <Descriptions.Item label="Số điện thoại">{selectedOrder.sdt}</Descriptions.Item>
+                            <Descriptions.Item label="Địa chỉ">{selectedOrder.diachi}</Descriptions.Item>
+                            <Descriptions.Item label="Ngày đặt">{selectedOrder.ngaydat}</Descriptions.Item>
+                            <Descriptions.Item label="Tổng tiền">
+                                {selectedOrder.tongtien} VNĐ
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Trạng thái hiện tại">
+                                <Tag color={getStatusColor(selectedOrder.trangthai)}>
+                                    {getStatusText(selectedOrder.trangthai)}
+                                </Tag>
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Cập nhật trạng thái">
+                                {(selectedOrder.trangthai === 3 || selectedOrder.trangthai === 4) ? (
+                                    <Tag color={getStatusColor(selectedOrder.trangthai)}>
+                                        {getStatusText(selectedOrder.trangthai)}
+                                    </Tag>
+                                ) : (
+                                    <Select
+                                        value={newStatus}
+                                        onChange={(value) => setNewStatus(value)}
+                                        style={{ width: '100%' }}
+                                    >
+                                        <Option value={1}>Đang xử lý</Option>
+                                        <Option value={2}>Đang giao</Option>
+                                        <Option value={3}>Đã giao</Option>
+
+                                    </Select>
+                                )}
+                            </Descriptions.Item>
+                        </Descriptions>
+
+                        <h3 style={{ marginTop: '16px' }}>Chi tiết sản phẩm</h3>
+                        <Table
+                            columns={[
+                                { title: 'ID sản phẩm', dataIndex: 'id_product', key: 'id_product' },
+                                { title: 'Tên sản phẩm', dataIndex: 'productName', key: 'productName' },
+                                { title: 'Loại sản phẩm', dataIndex: 'productType', key: 'productType' },
+                                { title: 'Mô tả', dataIndex: 'productDescription', key: 'productDescription' },
+                                { title: 'Chất liệu', dataIndex: 'productMaterial', key: 'productMaterial' },
+                                {
+                                    title: 'Size & Số lượng',
+                                    dataIndex: 'productSizes',
+                                    key: 'productSizes',
+                                    render: (sizes) =>
+                                        sizes.map((size, index) => (
+                                            <Tag key={index}>
+                                                {size.size}: {size.soluong}
+                                            </Tag>
+                                        )),
+                                },
+                                { title: 'Giá', dataIndex: 'productPrice', key: 'productPrice' },
+                                {
+                                    title: 'Hình ảnh',
+                                    dataIndex: 'productImage',
+                                    key: 'productImage',
+                                    render: (image) => (
+                                        <img src={image} alt="Sản phẩm" style={{ width: '50px', height: '50px' }} />
+                                    ),
+                                },
+                                { title: 'Loại chính', dataIndex: 'productCategory', key: 'productCategory' },
+                                {
+                                    title: 'Tổng tiền',
+                                    key: 'totalPrice',
+                                    render: (_, record) => {
+                                        return record.productSizes.reduce(
+                                            (total, size) => total + size.soluong * record.productPrice,
+                                            0
+                                        ) + ' VNĐ';
+                                    },
+                                },
+                            ]}
+                            dataSource={orderDetails}
+                            rowKey="id"
+                            pagination={false}
+                        />
+                    </>
+                )}
+            </Modal>
+        </div>
+    );
 
 };
 
