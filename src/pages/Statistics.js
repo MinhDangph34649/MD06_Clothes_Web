@@ -89,12 +89,12 @@ const Statistics = () => {
             const productSnapshot = await getDocs(collection(db, 'SanPham'));
             const inventory = productSnapshot.docs.map((doc) => {
                 const sizes = doc.data().sizes || [];
-                const totalQuantity = sizes.reduce((sum, size) => sum + size.soluong, 0); // Tính tổng số lượng từ sizes
+                const totalQuantity = sizes.reduce((sum, size) => sum + size.soluong, 0);
                 return {
                     id: doc.id,
                     tensp: doc.data().tensp,
                     hinhanh: doc.data().hinhanh,
-                    totalQuantity, // Tổng số lượng từ tất cả sizes
+                    totalQuantity,
                 };
             });
             setInventoryData(inventory);
@@ -104,13 +104,9 @@ const Statistics = () => {
         }
     };
 
-
-    // Modify the calculateStatistics function's sorting logic
-
     const calculateStatistics = async () => {
         const { orders, salesData } = await fetchAllData();
 
-        // Filter orders based on date range
         const filteredOrders = orders.filter((order) => {
             if (dateRange[0] && dateRange[1]) {
                 const startDate = dayjs(dateRange[0]).startOf('day');
@@ -141,12 +137,11 @@ const Statistics = () => {
                 const format = timeFrame === 'day' ? 'DD/MM/YYYY' : timeFrame === 'month' ? 'MM/YYYY' : 'YYYY';
                 return { key, date: dayjs(key, format) };
             })
-            .sort((a, b) => a.date.valueOf() - b.date.valueOf()) // Sort by ascending order
-            .map((item) => item.key); // Retrieve sorted keys
+            .sort((a, b) => a.date.valueOf() - b.date.valueOf())
+            .map((item) => item.key);
 
         const sortedData = sortedKeys.map((key) => groupedData[key]);
 
-        // Sort and fetch details for top-selling products
         const sortedSales = Object.entries(salesData)
             .sort(([, a], [, b]) => b - a)
             .slice(0, 10);
@@ -155,7 +150,7 @@ const Statistics = () => {
             const product = await fetchProductDetails(id_product);
             return { id_product, ...product, totalSold };
         });
-
+        
         const bestSellersData = await Promise.all(bestSellerPromises);
 
         // Update state with sorted data
@@ -182,7 +177,7 @@ const Statistics = () => {
         labels,
         datasets: [
             {
-                label: 'Revenue (VNĐ)',
+                label: 'Doanh thu (VNĐ)',
                 data: chartData,
                 backgroundColor: 'rgba(75, 192, 192, 0.6)',
                 borderColor: 'rgba(75, 192, 192, 1)',
@@ -195,13 +190,13 @@ const Statistics = () => {
         responsive: true,
         plugins: {
             legend: { display: showLegend, position: 'top' },
-            title: { display: true, text: `Revenue Statistics by ${timeFrame}` },
+            title: { display: true, text: `Thống kê doanh thu theo ${timeFrame}` },
         },
     };
 
     return (
         <div>
-            <h2>Statistics</h2>
+            <h2>Thống kê</h2>
             <Row gutter={[16, 16]} style={{ marginBottom: '16px' }}>
                 <Col span={8}>
                     <Select
@@ -209,9 +204,9 @@ const Statistics = () => {
                         onChange={(value) => setTimeFrame(value)}
                         style={{ width: '100%' }}
                     >
-                        <Option value="day">By Day</Option>
-                        <Option value="month">By Month</Option>
-                        <Option value="year">By Year</Option>
+                        <Option value="day">Ngày</Option>
+                        <Option value="month">Tháng</Option>
+                        <Option value="year">Năm</Option>
                     </Select>
                 </Col>
                 <Col span={8}>
@@ -225,18 +220,18 @@ const Statistics = () => {
                     <Switch
                         checked={showLegend}
                         onChange={(checked) => setShowLegend(checked)}
-                        checkedChildren="Show Legend"
-                        unCheckedChildren="Hide Legend"
+                        checkedChildren="Hiển thị chú thích"
+                        unCheckedChildren="Ẩn chú thích"
                     />
                 </Col>
             </Row>
 
             <div style={{ marginBottom: '16px' }}>
-                <h3>Total Revenue: {totalRevenue.toLocaleString()} VNĐ</h3>
+                <h3>Tổng doanh thu: {totalRevenue.toLocaleString()} VNĐ</h3>
             </div>
 
             <Button onClick={() => setChartType(chartType === 'Bar' ? 'Line' : 'Bar')}>
-                Toggle Chart Type
+                Đổi loại biểu đồ
             </Button>
 
             {chartType === 'Bar' ? (
@@ -247,7 +242,7 @@ const Statistics = () => {
 
             <Row gutter={[16, 16]}>
                 <Col span={12}>
-                    <h3>Top-Selling Products</h3>
+                    <h3>Sản phẩm bán chạy nhất</h3>
                     <List
                         itemLayout="horizontal"
                         dataSource={bestSellers}
@@ -263,7 +258,7 @@ const Statistics = () => {
                     />
                 </Col>
                 <Col span={12}>
-                    <h3>Inventory Data</h3>
+                    <h3>Sản phẩm tồn kho</h3>
                     <List
                         itemLayout="horizontal"
                         dataSource={inventoryData}
@@ -272,7 +267,7 @@ const Statistics = () => {
                                 <List.Item.Meta
                                     avatar={<Avatar src={item.hinhanh} />}
                                     title={item.tensp}
-                                    description={`Inventory: ${item.totalQuantity}`}
+                                    description={`Trong kho: ${item.totalQuantity}`}
                                 />
                             </List.Item>
                         )}
