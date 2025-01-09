@@ -207,7 +207,7 @@ const Users = () => {
                 onChange={(e) => handleSearch(e.target.value)}
                 style={{ marginBottom: 16, width: 300 }}
             />
-            <Button type="primary" onClick={() => openModal()} style={{ marginBottom: 16 }}>
+            <Button type="primary" onClick={() => openModal()} style={{ marginBottom: 16, marginLeft: 1000 }}>
                 Thêm người dùng
             </Button>
             <Table columns={columns} dataSource={filteredUsers} rowKey="id" />

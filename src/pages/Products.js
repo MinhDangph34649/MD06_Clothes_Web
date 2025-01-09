@@ -165,7 +165,7 @@ const Products = () => {
                 onChange={(e) => handleSearch(e.target.value)}
                 style={{ marginBottom: 16, width: '300px' }}
             />
-            <Button type="primary" onClick={handleAddProduct} style={{ marginBottom: 16 }}>
+            <Button type="primary" onClick={handleAddProduct} style={{ marginBottom: 16, marginLeft: 1000 }}>
                 Thêm sản phẩm
             </Button>
             <Table columns={columns} dataSource={filteredProducts} rowKey="id" />

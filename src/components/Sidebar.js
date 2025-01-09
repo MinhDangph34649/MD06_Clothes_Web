@@ -5,7 +5,6 @@ import {
     AppstoreOutlined,
     TagsOutlined,
     UserOutlined,
-    QrcodeOutlined,
     OrderedListOutlined,
     LineChartOutlined,
 } from '@ant-design/icons';
