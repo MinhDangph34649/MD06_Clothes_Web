@@ -6,7 +6,6 @@ import Sidebar from './components/Sidebar';
 import Products from './pages/Products';
 import Categories from './pages/Categories';
 import Users from './pages/Users';
-import QRCodeGenerator from './pages/QRCodeGenerator';
 import Orders from './pages/Orders';
 import Statistics from './pages/Statistics';
 import LoginPage from './pages/LoginPage';
@@ -20,19 +19,18 @@ const ProtectedRoute = ({ element, ...rest }) => {
 };
 
 const App = () => {
-  const [collapsed, setCollapsed] = useState(false); // Quản lý trạng thái Sidebar
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
     <AuthProvider>
       <Router>
         <Layout style={{ minHeight: '100vh', paddingTop: '64px' }}>
-          {/* 64px là chiều cao của Header */}
           <Navbar />
           <Layout>
             <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
             <Layout
               style={{
-                marginLeft: collapsed ? '80px' : '200px', // Sử dụng trạng thái collapsed
+                marginLeft: collapsed ? '80px' : '200px',
                 transition: 'margin-left 0.2s ease',
               }}
             >
@@ -43,7 +41,6 @@ const App = () => {
                   <Route path="/products" element={<ProtectedRoute element={<Products />} />} />
                   <Route path="/categories" element={<ProtectedRoute element={<Categories />} />} />
                   <Route path="/users" element={<ProtectedRoute element={<Users />} />} />
-                  <Route path="/qrcode" element={<ProtectedRoute element={<QRCodeGenerator />} />} />
                   <Route path="/orders" element={<ProtectedRoute element={<Orders />} />} />
                   <Route path="/statistics" element={<ProtectedRoute element={<Statistics />} />} />
                   <Route path="*" element={<div>404 - Page Not Found</div>} />
