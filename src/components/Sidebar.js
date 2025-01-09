@@ -37,9 +37,6 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
                 <Menu.Item key="3" icon={<UserOutlined />}>
                     <Link to="/users">Quản lý user</Link>
                 </Menu.Item>
-                <Menu.Item key="4" icon={<QrcodeOutlined />}>
-                    <Link to="/qrcode">Tạo mã QR</Link>
-                </Menu.Item>
                 <Menu.Item key="5" icon={<OrderedListOutlined />}>
                     <Link to="/orders">Duyệt đơn</Link>
                 </Menu.Item>
