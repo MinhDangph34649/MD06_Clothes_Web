@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-
 import {
     Table,
     Tag,
@@ -20,7 +19,6 @@ const { Search } = Input;
 const { Option } = Select;
 
 const OrderManagement = () => {
-
     const [orders, setOrders] = useState([]);
     const [filteredOrders, setFilteredOrders] = useState([]);
     const [selectedOrder, setSelectedOrder] = useState(null);
@@ -92,6 +90,7 @@ const OrderManagement = () => {
             const fetchedDetails = await Promise.all(
                 querySnapshot.docs.map(async (detailDoc) => {
                     const detailData = detailDoc.data();
+
                     try {
                         const productRef = doc(db, 'SanPham', detailData.id_product);
                         const productSnapshot = await getDoc(productRef);
@@ -150,6 +149,8 @@ const OrderManagement = () => {
         }
     };
 
+
+
     const handleCancelOrder = async (order) => {
         try {
             const detailsQuery = query(
@@ -192,7 +193,6 @@ const OrderManagement = () => {
             message.error('Lỗi khi hủy đơn hàng!');
         }
     };
-
     const getStatusColor = (status) => {
         switch (status) {
             case 1:
@@ -207,7 +207,6 @@ const OrderManagement = () => {
                 return 'gray';
         }
     };
-
     const getStatusText = (status) => {
         switch (status) {
             case 1:
@@ -269,7 +268,6 @@ const OrderManagement = () => {
         await fetchOrderDetails(order.id, order.UID);
         setIsModalOpen(true);
     };
-
 
     useEffect(() => {
         fetchOrders();
@@ -448,7 +446,6 @@ const OrderManagement = () => {
             </Modal>
         </div>
     );
-
 };
 
 export default OrderManagement;
