@@ -5,12 +5,11 @@ import db from '../services/firebaseConfig';
 
 const Categories = () => {
     const [categories, setCategories] = useState([]);
-    const [filteredCategories, setFilteredCategories] = useState([]); // Danh sách đã lọc
+    const [filteredCategories, setFilteredCategories] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [form] = Form.useForm();
     const [editingCategory, setEditingCategory] = useState(null);
 
-    // ** Lấy danh sách loại sản phẩm từ Firestore **
     const fetchCategories = async () => {
         try {
             const querySnapshot = await getDocs(collection(db, 'LoaiProduct'));
@@ -19,7 +18,7 @@ const Categories = () => {
                 ...doc.data(),
             }));
             setCategories(fetchedCategories);
-            setFilteredCategories(fetchedCategories); // Cập nhật danh sách hiển thị ban đầu
+            setFilteredCategories(fetchedCategories);
         } catch (error) {
             console.error('Error fetching categories:', error);
         }
@@ -29,17 +28,14 @@ const Categories = () => {
         fetchCategories();
     }, []);
 
-    // ** Thêm mới hoặc chỉnh sửa loại sản phẩm **
     const handleConfirm = async () => {
         try {
             const values = await form.validateFields();
             if (editingCategory) {
-                // Chỉnh sửa
                 const categoryRef = doc(db, 'LoaiProduct', editingCategory.id);
                 await updateDoc(categoryRef, values);
                 message.success('Chỉnh sửa loại sản phẩm thành công!');
             } else {
-                // Thêm mới
                 await addDoc(collection(db, 'LoaiProduct'), values);
                 message.success('Thêm loại sản phẩm thành công!');
             }
@@ -52,7 +48,6 @@ const Categories = () => {
         }
     };
 
-    // ** Xóa loại sản phẩm **
     const handleDeleteCategory = async (id) => {
         try {
             const categoryRef = doc(db, 'LoaiProduct', id);
@@ -65,14 +60,12 @@ const Categories = () => {
         }
     };
 
-    // ** Hiển thị thông tin chỉnh sửa **
     const handleEditCategory = (category) => {
         setEditingCategory(category);
         form.setFieldsValue(category);
         setIsModalOpen(true);
     };
 
-    // ** Tìm kiếm loại sản phẩm **
     const handleSearch = (value) => {
         const filtered = categories.filter((category) =>
             category.tenloai.toLowerCase().includes(value.toLowerCase())
@@ -80,27 +73,24 @@ const Categories = () => {
         setFilteredCategories(filtered);
     };
 
-    // ** Hiển thị bảng dữ liệu **
     const columns = [
-        {
-            title: 'ID',
-            dataIndex: 'id',
-            key: 'id',
-        },
         {
             title: 'Tên loại',
             dataIndex: 'tenloai',
             key: 'tenloai',
+            align: 'center',
         },
         {
             title: 'Hình ảnh loại',
             dataIndex: 'hinhanhloai',
             key: 'hinhanhloai',
+            align: 'center',
             render: (text) => <img src={text} alt="Loại" style={{ width: 50 }} />,
         },
         {
             title: 'Thao tác',
             key: 'action',
+            align: 'center',
             render: (_, record) => (
                 <Space size="middle">
                     <Button onClick={() => handleEditCategory(record)}>Sửa</Button>
@@ -110,7 +100,6 @@ const Categories = () => {
         },
     ];
 
-    // ** Reset và mở modal thêm loại **
     const handleAddCategory = () => {
         form.resetFields();
         setEditingCategory(null);

@@ -24,9 +24,9 @@ const LoginPage = () => {
             const querySnapshot = await getDocs(q);
 
             if (!querySnapshot.empty) {
-                login(); // Đặt trạng thái đăng nhập
+                login();
                 message.success('Đăng nhập thành công!');
-                navigate('/products'); // Chuyển hướng đến trang quản lý
+                navigate('/products');
             } else {
                 message.error('Tên đăng nhập hoặc mật khẩu không đúng!');
             }

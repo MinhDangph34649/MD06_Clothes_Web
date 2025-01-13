@@ -5,12 +5,11 @@ import db from '../services/firebaseConfig';
 
 const Users = () => {
     const [users, setUsers] = useState([]);
-    const [filteredUsers, setFilteredUsers] = useState([]); // Danh sách người dùng sau khi lọc
+    const [filteredUsers, setFilteredUsers] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingUser, setEditingUser] = useState(null); // User đang chỉnh sửa
+    const [editingUser, setEditingUser] = useState(null);
     const [form] = Form.useForm();
 
-    // ** Lấy danh sách user **
     const fetchUsers = async () => {
         try {
             const idUserSnapshot = await getDocs(collection(db, 'IDUser'));
@@ -36,7 +35,7 @@ const Users = () => {
             );
 
             setUsers(fullData);
-            setFilteredUsers(fullData); // Hiển thị danh sách ban đầu
+            setFilteredUsers(fullData);
         } catch (error) {
             console.error('Error fetching users:', error);
             message.error('Lỗi khi lấy danh sách người dùng!');
@@ -47,10 +46,9 @@ const Users = () => {
         fetchUsers();
     }, []);
 
-    // ** Tìm kiếm người dùng **
     const handleSearch = (value) => {
         const filtered = users.filter((user) => {
-            const name = user.hoten?.toLowerCase() || ''; // Kiểm tra null hoặc undefined
+            const name = user.hoten?.toLowerCase() || '';
             const email = user.email?.toLowerCase() || '';
             const phone = user.sdt || '';
 
@@ -63,15 +61,12 @@ const Users = () => {
         setFilteredUsers(filtered);
     };
 
-
-    // ** Thêm hoặc chỉnh sửa user **
     const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
             const { email, hoten, gioitinh, ngaysinh, diachi, sdt } = values;
 
             if (editingUser) {
-                // Chỉnh sửa
                 const idUserRef = doc(db, 'IDUser', editingUser.id);
                 const profileRef = doc(
                     db,
@@ -90,10 +85,9 @@ const Users = () => {
 
                 message.success('Cập nhật thông tin người dùng thành công!');
             } else {
-                // Thêm mới
                 const newIDUserRef = await addDoc(collection(db, 'IDUser'), {
                     email,
-                    iduser: Math.random().toString(36).substring(2, 10), // Tạo iduser ngẫu nhiên
+                    iduser: Math.random().toString(36).substring(2, 10),
                 });
                 await addDoc(collection(db, `User/${newIDUserRef.id}/Profile`), {
                     hoten,
@@ -117,7 +111,6 @@ const Users = () => {
         }
     };
 
-    // ** Xóa user **
     const handleDelete = async (id, iduser) => {
         try {
             const idUserRef = doc(db, 'IDUser', id);
@@ -139,7 +132,6 @@ const Users = () => {
         }
     };
 
-    // ** Mở modal thêm/sửa user **
     const openModal = (user = null) => {
         setEditingUser(user);
         if (user) {
@@ -165,6 +157,7 @@ const Users = () => {
             title: 'Giới tính',
             dataIndex: 'gioitinh',
             key: 'gioitinh',
+            align: 'center',
         },
         {
             title: 'Ngày sinh',
@@ -180,10 +173,12 @@ const Users = () => {
             title: 'Số điện thoại',
             dataIndex: 'sdt',
             key: 'sdt',
+            align: 'center',
         },
         {
             title: 'Hành động',
             key: 'action',
+            align: 'center',
             render: (_, record) => (
                 <Space size="middle">
                     <Button onClick={() => openModal(record)}>Sửa</Button>
@@ -207,9 +202,9 @@ const Users = () => {
                 onChange={(e) => handleSearch(e.target.value)}
                 style={{ marginBottom: 16, width: 300 }}
             />
-            <Button type="primary" onClick={() => openModal()} style={{ marginBottom: 16, marginLeft: 1000 }}>
+            {/* <Button type="primary" onClick={() => openModal()} style={{ marginBottom: 16, marginLeft: 1000 }}>
                 Thêm người dùng
-            </Button>
+            </Button> */}
             <Table columns={columns} dataSource={filteredUsers} rowKey="id" />
             <Modal
                 title={editingUser ? 'Chỉnh sửa người dùng' : 'Thêm người dùng'}

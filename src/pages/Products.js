@@ -11,7 +11,6 @@ const Products = () => {
     const [form] = Form.useForm();
     const [editingProduct, setEditingProduct] = useState(null);
 
-    // ** Lấy danh sách sản phẩm từ Firestore **
     const fetchProducts = async () => {
         try {
             const querySnapshot = await getDocs(collection(db, 'SanPham'));
@@ -31,7 +30,6 @@ const Products = () => {
         fetchProducts();
     }, []);
 
-    // ** Tìm kiếm sản phẩm **
     const handleSearch = (value) => {
         const filtered = products.filter((product) =>
             product.tensp.toLowerCase().includes(value.toLowerCase())
@@ -39,7 +37,6 @@ const Products = () => {
         setFilteredProducts(filtered);
     };
 
-    // ** Thêm mới hoặc chỉnh sửa sản phẩm **
     const handleConfirm = async () => {
         try {
             const values = await form.validateFields();
@@ -51,7 +48,7 @@ const Products = () => {
                 chatlieu: values.chatlieu || '',
                 hinhanh: values.hinhanh || '',
                 mota: values.mota || '',
-                type: values.type || 0, // Cho phép bất kỳ số nào
+                type: values.type || 0,
             };
 
             if (editingProduct) {
@@ -77,7 +74,6 @@ const Products = () => {
         }
     };
 
-    // ** Xóa sản phẩm **
     const handleDeleteProduct = async (id) => {
         try {
             const productRef = doc(db, 'SanPham', id);
@@ -90,14 +86,12 @@ const Products = () => {
         }
     };
 
-    // ** Hiển thị thông tin chỉnh sửa sản phẩm **
     const handleEditProduct = (product) => {
         setEditingProduct(product);
         form.setFieldsValue(product);
         setIsModalOpen(true);
     };
 
-    // ** Hiển thị bảng dữ liệu sản phẩm **
     const columns = [
         {
             title: 'Tên sản phẩm',
@@ -108,6 +102,7 @@ const Products = () => {
             title: 'Hình ảnh',
             dataIndex: 'hinhanh',
             key: 'hinhanh',
+            align: 'center',
             render: (text) =>
                 text ? <img src={text} alt="Hình sản phẩm" style={{ width: 50, height: 50 }} /> : 'Không có',
         },
@@ -115,23 +110,27 @@ const Products = () => {
             title: 'Loại sản phẩm',
             dataIndex: 'loaisp',
             key: 'loaisp',
+            align: 'center',
         },
         {
             title: 'Giá tiền',
             dataIndex: 'giatien',
             key: 'giatien',
+            align: 'center',
             render: (text) => `${text} VNĐ`,
         },
         {
             title: 'Loại',
             dataIndex: 'type',
             key: 'type',
-            render: (text) => `Loại: ${text}`, // Hiển thị số chính xác
+            align: 'center',
+            render: (text) => `Loại: ${text}`,
         },
         {
             title: 'Kích thước & Số lượng',
             dataIndex: 'sizes',
             key: 'sizes',
+            align: 'center',
             render: (sizes) =>
                 sizes?.map(({ size, soluong }) => (
                     <div key={size}>
@@ -142,6 +141,7 @@ const Products = () => {
         {
             title: 'Hành động',
             key: 'action',
+            align: 'center',
             render: (_, record) => (
                 <Space size="middle">
                     <Button onClick={() => handleEditProduct(record)}>Sửa</Button>
@@ -151,7 +151,6 @@ const Products = () => {
         },
     ];
 
-    // ** Reset và mở modal thêm sản phẩm mới **
     const handleAddProduct = () => {
         form.resetFields();
         setEditingProduct(null);
