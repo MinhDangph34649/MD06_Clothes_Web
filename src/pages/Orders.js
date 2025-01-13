@@ -60,7 +60,7 @@ const OrderManagement = () => {
             previousOrderIdsRef.current = currentOrderIds;
 
             setOrders(sortedOrders);
-            applyFilters(sortedOrders, statusFilter, ''); // Áp dụng bộ lọc
+            applyFilters(sortedOrders, statusFilter, '');
         });
     };
 
@@ -288,7 +288,9 @@ const OrderManagement = () => {
                 <Col span={12}>
                     <Select
                         placeholder="Lọc theo trạng thái"
-                        onChange={(value) => setStatusFilter(value)}
+                        onChange={(value) => {
+                            setStatusFilter(value);
+                        }}
                         allowClear
                         style={{ width: '100%' }}
                     >
@@ -314,6 +316,7 @@ const OrderManagement = () => {
                             <p>Họ tên: {order.hoten}</p>
                             <p>Số điện thoại: {order.sdt}</p>
                             <p>Tổng tiền: {order.tongtien} VNĐ</p>
+                            <p>Phương thức: {order.phuongthuc}</p>
                             <Button
                                 type="primary"
                                 onClick={() => handleViewDetails(order)}
@@ -372,6 +375,7 @@ const OrderManagement = () => {
                             <Descriptions.Item label="Tổng tiền">
                                 {selectedOrder.tongtien} VNĐ
                             </Descriptions.Item>
+                            <Descriptions.Item label="Phương thức thanh toán">{selectedOrder.phuongthuc}</Descriptions.Item>
                             <Descriptions.Item label="Trạng thái hiện tại">
                                 <Tag color={getStatusColor(selectedOrder.trangthai)}>
                                     {getStatusText(selectedOrder.trangthai)}
