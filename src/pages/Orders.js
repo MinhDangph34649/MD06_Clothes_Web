@@ -404,7 +404,6 @@ const OrderManagement = () => {
                         <h3 style={{ marginTop: '16px' }}>Chi tiết sản phẩm</h3>
                         <Table
                             columns={[
-                                // { title: 'ID sản phẩm', dataIndex: 'id_product', key: 'id_product', align: 'center' },
                                 { title: 'Tên sản phẩm', dataIndex: 'productName', key: 'productName', align: 'center' },
                                 { title: 'Loại sản phẩm', dataIndex: 'productType', key: 'productType', align: 'center' },
                                 { title: 'Mô tả', dataIndex: 'productDescription', key: 'productDescription', align: 'center' },
