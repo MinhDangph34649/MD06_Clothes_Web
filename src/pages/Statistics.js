@@ -16,6 +16,7 @@ import db from '../services/firebaseConfig';
 import { Select, message, Switch, Row, Col, DatePicker, List, Avatar, Button } from 'antd';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
+import SalesStatistics from './SalesStatistics';
 
 dayjs.extend(isBetween);
 
@@ -250,41 +251,9 @@ const Statistics = () => {
             ) : (
                 <Line data={data} options={options} />
             )}
-
-            <Row gutter={[16, 16]}>
-                <Col span={12}>
-                    <h3>Sản phẩm bán chạy nhất</h3>
-                    <List
-                        itemLayout="horizontal"
-                        dataSource={bestSellers}
-                        renderItem={(item) => (
-                            <List.Item>
-                                <List.Item.Meta
-                                    avatar={<Avatar src={item?.hinhanh || ''} />}
-                                    title={item?.tensp || 'Unknown'}
-                                    description={`Đã bán: ${item.totalSold} - Giá: ${item?.giatien || 'N/A'} VNĐ`}
-                                />
-                            </List.Item>
-                        )}
-                    />
-                </Col>
-                <Col span={12}>
-                    <h3>Sản phẩm tồn kho</h3>
-                    <List
-                        itemLayout="horizontal"
-                        dataSource={inventoryData}
-                        renderItem={(item) => (
-                            <List.Item>
-                                <List.Item.Meta
-                                    avatar={<Avatar src={item.hinhanh} />}
-                                    title={item.tensp}
-                                    description={`Trong kho: ${item.totalQuantity}`}
-                                />
-                            </List.Item>
-                        )}
-                    />
-                </Col>
-            </Row>
+            <div style={{marginTop: 32}}>
+                <SalesStatistics />
+            </div>
         </div>
     );
 };

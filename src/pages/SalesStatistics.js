@@ -108,6 +108,7 @@ const SalesStatistics = () => {
             title: 'Hình ảnh',
             dataIndex: 'image',
             key: 'image',
+            align: 'center',
             render: (image) => (
                 <img src={image} alt="Sản phẩm" style={{ width: '50px', height: '50px' }} />
             ),
@@ -116,21 +117,25 @@ const SalesStatistics = () => {
             title: 'Tên sản phẩm',
             dataIndex: 'name',
             key: 'name',
+            align: 'center',
         },
         {
             title: 'Số lượng bán',
             dataIndex: 'totalSold',
             key: 'totalSold',
+            align: 'center',
         },
         {
             title: 'Size bán chạy',
             dataIndex: 'bestSize',
             key: 'bestSize',
+            align: 'center',
         },
         {
             title: 'Tồn kho',
             dataIndex: 'inventory',
             key: 'inventory',
+            align: 'center',
         },
     ];
 
@@ -140,15 +145,15 @@ const SalesStatistics = () => {
             <RangePicker
                 onChange={(dates) => setDateRange(dates || [null, null])}
                 format="DD/MM/YYYY"
-                style={{ marginBottom: '16px', width: '100%' }}
+                style={{ marginBottom: '16px', width: '30%' }}
             />
             <Button
                 type="primary"
                 onClick={fetchSalesStatistics}
                 loading={loading}
-                style={{ marginBottom: '16px' }}
+                style={{ marginBottom: '16px', marginLeft: '10px' }}
             >
-                Thống kê
+                Tìm kiếm
             </Button>
             <Table
                 columns={columns}
