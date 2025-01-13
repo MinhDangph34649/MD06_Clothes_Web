@@ -29,36 +29,42 @@ const OrderManagement = () => {
     const [lastNotifiedOrderIds, setLastNotifiedOrderIds] = useState(new Set());
     const previousOrderIdsRef = useRef(new Set());
 
+    const parseDate = (dateString) => {
+        const [day, month, year] = dateString.split('/').map(Number);
+        return new Date(year, month - 1, day);
+    };
     const fetchOrders = () => {
         const ordersCollection = collection(db, 'HoaDon');
-
+    
         onSnapshot(ordersCollection, (snapshot) => {
             const fetchedOrders = snapshot.docs.map((doc) => ({
                 id: doc.id,
                 ...doc.data(),
             }));
 
-            const sortedOrders = fetchedOrders.sort((a, b) => a.trangthai - b.trangthai);
-
+            const sortedOrders = fetchedOrders.sort((a, b) => 
+                parseDate(b.ngaydat) - parseDate(a.ngaydat)
+            );
+    
             const currentOrderIds = new Set(fetchedOrders.map((order) => order.id));
             const newOrders = fetchedOrders.filter(
                 (order) => !previousOrderIdsRef.current.has(order.id)
             );
-
+    
             if (newOrders.length > 0) {
                 const newOrderIds = new Set(newOrders.map((order) => order.id));
                 const notNotifiedOrders = newOrders.filter(
                     (order) => !lastNotifiedOrderIds.has(order.id)
                 );
-
+    
                 if (notNotifiedOrders.length > 0) {
                     message.success(`Có ${notNotifiedOrders.length} đơn hàng mới!`);
                     setLastNotifiedOrderIds(newOrderIds);
                 }
             }
-
+    
             previousOrderIdsRef.current = currentOrderIds;
-
+    
             setOrders(sortedOrders);
             applyFilters(sortedOrders, statusFilter, '');
         });
@@ -317,6 +323,7 @@ const OrderManagement = () => {
                             <p>Số điện thoại: {order.sdt}</p>
                             <p>Tổng tiền: {order.tongtien} VNĐ</p>
                             <p>Phương thức: {order.phuongthuc}</p>
+                            <p>Ngày đặt: {order.ngaydat}</p>
                             <Button
                                 type="primary"
                                 onClick={() => handleViewDetails(order)}
