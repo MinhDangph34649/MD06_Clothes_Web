@@ -26,7 +26,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
                 boxShadow: '2px 0 6px rgba(0, 0, 0, 0.1)',
             }}
         >
-            <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline" style={{ paddingTop: '20px', fontSize: '16px' }}>
+            <Menu theme="dark" defaultSelectedKeys={['1']} mode="vertical" style={{ paddingTop: '20px', fontSize: '16px' }}>
                 <Menu.Item key="1" icon={<AppstoreOutlined />}>
                     <Link to="/products">Quản lý sản phẩm</Link>
                 </Menu.Item>
@@ -34,7 +34,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
                     <Link to="/categories">Quản lý danh mục</Link>
                 </Menu.Item>
                 <Menu.Item key="3" icon={<UserOutlined />}>
-                    <Link to="/users">Quản lý user</Link>
+                    <Link to="/users">Quản lý người dùng</Link>
                 </Menu.Item>
                 <Menu.Item key="5" icon={<OrderedListOutlined />}>
                     <Link to="/orders">Duyệt đơn</Link>

@@ -327,7 +327,7 @@ const OrderManagement = () => {
                             {order.trangthai === 1 && (
                                 <Button
                                     type="danger"
-                                    style={{ backgroundColor: 'red', color: 'white', marginTop: 8 }}
+                                    style={{ backgroundColor: '#AA0000', color: 'white', marginTop: 8 }}
                                     onClick={() => confirmCancelOrder(order)}
                                 >
                                     Hủy đơn hàng
@@ -404,14 +404,15 @@ const OrderManagement = () => {
                         <h3 style={{ marginTop: '16px' }}>Chi tiết sản phẩm</h3>
                         <Table
                             columns={[
-                                { title: 'ID sản phẩm', dataIndex: 'id_product', key: 'id_product' },
-                                { title: 'Tên sản phẩm', dataIndex: 'productName', key: 'productName' },
-                                { title: 'Loại sản phẩm', dataIndex: 'productType', key: 'productType' },
-                                { title: 'Mô tả', dataIndex: 'productDescription', key: 'productDescription' },
-                                { title: 'Chất liệu', dataIndex: 'productMaterial', key: 'productMaterial' },
+                                // { title: 'ID sản phẩm', dataIndex: 'id_product', key: 'id_product', align: 'center' },
+                                { title: 'Tên sản phẩm', dataIndex: 'productName', key: 'productName', align: 'center' },
+                                { title: 'Loại sản phẩm', dataIndex: 'productType', key: 'productType', align: 'center' },
+                                { title: 'Mô tả', dataIndex: 'productDescription', key: 'productDescription', align: 'center' },
+                                { title: 'Chất liệu', dataIndex: 'productMaterial', key: 'productMaterial', align: 'center' },
                                 {
                                     title: 'Size & Số lượng',
                                     dataIndex: 'productSizes',
+                                    align: 'center',
                                     key: 'productSizes',
                                     render: (sizes) =>
                                         sizes.map((size, index) => (
@@ -420,16 +421,17 @@ const OrderManagement = () => {
                                             </Tag>
                                         )),
                                 },
-                                { title: 'Giá', dataIndex: 'productPrice', key: 'productPrice' },
+                                { title: 'Giá', dataIndex: 'productPrice', key: 'productPrice', align: 'center' },
                                 {
                                     title: 'Hình ảnh',
                                     dataIndex: 'productImage',
                                     key: 'productImage',
+                                    align: 'center',
                                     render: (image) => (
                                         <img src={image} alt="Sản phẩm" style={{ width: '50px', height: '50px' }} />
                                     ),
                                 },
-                                { title: 'Loại chính', dataIndex: 'productCategory', key: 'productCategory' },
+                                { title: 'Loại chính', dataIndex: 'productCategory', key: 'productCategory', align: 'center' },
                                 {
                                     title: 'Tổng tiền',
                                     key: 'totalPrice',
@@ -439,6 +441,7 @@ const OrderManagement = () => {
                                             0
                                         ) + ' VNĐ';
                                     },
+                                    align: 'center'
                                 },
                             ]}
                             dataSource={orderDetails}
