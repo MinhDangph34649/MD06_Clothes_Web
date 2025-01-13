@@ -36,21 +36,22 @@ const { RangePicker } = DatePicker;
 const Statistics = () => {
     const [timeFrame, setTimeFrame] = useState('day');
     const [dateRange, setDateRange] = useState([null, null]);
+    const [statusFilter, setStatusFilter] = useState(null);
     const [chartData, setChartData] = useState([]);
     const [labels, setLabels] = useState([]);
     const [showLegend, setShowLegend] = useState(true);
     const [chartType, setChartType] = useState('Bar');
     const [bestSellers, setBestSellers] = useState([]);
-    const [inventoryData, setInventoryData] = useState([]); // Hàng tồn kho
-    const [totalRevenue, setTotalRevenue] = useState(0); // State để lưu tổng tiền
+    const [inventoryData, setInventoryData] = useState([]);
+    const [totalRevenue, setTotalRevenue] = useState(0);
 
-    // Fetch all orders and sales data
     const fetchAllData = async () => {
         try {
             const ordersSnapshot = await getDocs(collection(db, 'HoaDon'));
             const orders = ordersSnapshot.docs.map((doc) => ({
                 id: doc.id,
                 UID: doc.data().UID,
+                trangthai: doc.data().trangthai,
                 ngaydat: dayjs(doc.data().ngaydat, 'DD/MM/YYYY'),
                 tongtien: parseFloat(doc.data().tongtien.replace(/\./g, '')),
             }));
@@ -108,12 +109,16 @@ const Statistics = () => {
         const { orders, salesData } = await fetchAllData();
 
         const filteredOrders = orders.filter((order) => {
-            if (dateRange[0] && dateRange[1]) {
-                const startDate = dayjs(dateRange[0]).startOf('day');
-                const endDate = dayjs(dateRange[1]).endOf('day');
-                return order.ngaydat.isBetween(startDate, endDate, null, '[]');
-            }
-            return true;
+            const isWithinDateRange = !dateRange[0] || !dateRange[1] || order.ngaydat.isBetween(
+                dayjs(dateRange[0]).startOf('day'),
+                dayjs(dateRange[1]).endOf('day'),
+                null,
+                '[]'
+            );
+
+            const matchesStatus = statusFilter === null || order.trangthai === statusFilter;
+
+            return isWithinDateRange && matchesStatus;
         });
 
         const groupedData = {};
@@ -130,7 +135,6 @@ const Statistics = () => {
             groupedData[key] = (groupedData[key] || 0) + order.tongtien;
             totalRevenueTemp += order.tongtien;
         });
-
 
         const sortedKeys = Object.keys(groupedData)
             .map((key) => {
@@ -150,28 +154,23 @@ const Statistics = () => {
             const product = await fetchProductDetails(id_product);
             return { id_product, ...product, totalSold };
         });
-        
+
         const bestSellersData = await Promise.all(bestSellerPromises);
 
-        // Update state with sorted data
         setLabels(sortedKeys);
         setChartData(sortedData);
         setBestSellers(bestSellersData);
-        setTotalRevenue(totalRevenueTemp); // Cập nhật tổng tiền vào state
+        setTotalRevenue(totalRevenueTemp);
 
         if (sortedKeys.length === 0) {
             message.warning('No data available for the selected date range.');
         }
     };
 
-
-
-
-
     useEffect(() => {
         calculateStatistics();
-        fetchInventoryData(); // Lấy dữ liệu hàng tồn kho
-    }, [timeFrame, dateRange]);
+        fetchInventoryData();
+    }, [timeFrame, dateRange, statusFilter]);
 
     const data = {
         labels,
@@ -198,7 +197,7 @@ const Statistics = () => {
         <div>
             <h2>Thống kê</h2>
             <Row gutter={[16, 16]} style={{ marginBottom: '16px' }}>
-                <Col span={8}>
+                <Col span={6}>
                     <Select
                         value={timeFrame}
                         onChange={(value) => setTimeFrame(value)}
@@ -209,14 +208,26 @@ const Statistics = () => {
                         <Option value="year">Năm</Option>
                     </Select>
                 </Col>
-                <Col span={8}>
+                <Col span={6}>
                     <RangePicker
                         onChange={(dates) => setDateRange(dates || [null, null])}
                         format="DD/MM/YYYY"
                         style={{ width: '100%' }}
                     />
                 </Col>
-                <Col span={8}>
+                <Col span={6}>
+                    <Select
+                        value={statusFilter}
+                        onChange={(value) => setStatusFilter(value)}
+                        style={{ width: '100%' }}
+                        placeholder="Chọn trạng thái"
+                    >
+                        <Option value={null}>Tất cả</Option>
+                        <Option value={1}>Đang xử lý</Option>
+                        <Option value={3}>Đã giao</Option>
+                    </Select>
+                </Col>
+                <Col span={6}>
                     <Switch
                         checked={showLegend}
                         onChange={(checked) => setShowLegend(checked)}
@@ -276,7 +287,6 @@ const Statistics = () => {
             </Row>
         </div>
     );
-
 };
 
 export default Statistics;
